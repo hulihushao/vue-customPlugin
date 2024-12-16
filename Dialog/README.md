@@ -7,23 +7,23 @@
 ## 参数：
 
 
-| 名称                | 说明                                              | 类型            | 默认    |
-| ------------------- | ------------------------------------------------- | --------------- | ------- |
-| title               | 弹窗标题                                          | string          | ''      |
-| customClass         | 自定义class                                       | string          | ''      |
-| component           | 弹窗内容组件                                      | component       | 无      |
-| componentProps      | 弹窗内容组件props                                 | object          | {}      |
-| width               | 弹窗宽度                                          | number, string | 710     |
-| closeAfterCatch     | `是否在请求失败后关闭弹窗`                        | boolean         | `false` |
-| `closeOnClickModal` | `是否可以通过点击 modal 关闭 Dialog`              | boolean         | true    |
-| `showAfterMounted`  | `是否在组件挂载后显示弹窗`                        | boolean         | true    |
-| `locale`            | 语言，可选`'zh_cn','en_US'`                       | string          | `zh_cn` |
-| `modal`             | 遮罩层                                            | boolean         | true    |
-| `footer`            | 底部按钮, footer=null可不显示                     | component，null |         |
-| `footerProps`       | 底部props                                         | object          | {}      |
-| `ok`                | 点击确定按钮的回调，接收一个参数：传入组件的$refs | function($refs) |         |
-| `cancel/close`      | Dialog 关闭的回调                                 | function        |         |
-| `open`              | Dialog 打开的回调                                 | function        |         |
+| 名称                | 说明                                                                                             | 类型            | 默认    |
+| ------------------- | ------------------------------------------------------------------------------------------------ | --------------- | ------- |
+| title               | 弹窗标题                                                                                         | string          | ''      |
+| customClass         | 自定义class                                                                                      | string          | ''      |
+| component           | 弹窗内容组件                                                                                     | component       | 无      |
+| componentProps      | 弹窗内容组件props                                                                                | object          | {}      |
+| width               | 弹窗宽度                                                                                         | number, string | 710     |
+| closeAfterCatch     | `是否在请求失败后关闭弹窗`                                                                       | boolean         | `false` |
+| `closeOnClickModal` | `是否可以通过点击 modal 关闭 Dialog`                                                             | boolean         | true    |
+| `showAfterMounted`  | `是否在组件挂载后显示弹窗`                                                                       | boolean         | true    |
+| `locale`            | 语言，可选`'zh_cn','en_US'`                                                                      | string          | `zh_cn` |
+| `modal`             | 遮罩层                                                                                           | boolean         | true    |
+| `footer`            | 底部按钮, footer=null可不显示                                                                    | component，null |         |
+| `footerProps`       | 底部props                                                                                        | object          | {}      |
+| `ok`                | 点击确定按钮的回调，接收一个参数：传入组件的$refs，<br /><br />return Promise()会有按钮的loading | function($refs) |         |
+| `cancel/close`      | Dialog 关闭的回调                                                                                | function        |         |
+| `open`              | Dialog 打开的回调                                                                                | function        |         |
 
 ## 使用说明：
 
