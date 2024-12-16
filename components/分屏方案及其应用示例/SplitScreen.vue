@@ -6,7 +6,7 @@
         <div
           class="main-content-item"
           :class="{ 'is-actice': item.id == isActive }"
-          v-for="item in screenListData"
+          v-for="item in screenList"
           :key="item.id"
           @click="clickItem(item)"
         >
@@ -18,12 +18,9 @@
             class="title"
             :style="{ 'margin-left': item.isApply ? '10px' : '40px' }"
           >
-            <span class="icon"
-              ><img
-                style="width: 24px; height: 24px"
-                src="~@/assets/img/user.png"
-                alt="" /></span
-            ><span class="name">{{ item.name }}</span>
+            <span class="icon"></span>
+            <span class="name">{{ item.name }}</span>
+            <a @click.stop="apply()" style="margin-left: 50px"> 应用 </a>
           </div>
         </div>
       </div>
@@ -163,7 +160,12 @@ export default {
       divWidthNum: 3,
       divHeightNum: 3,
       itemWidthHeight: 120,
-      screenList: [],
+      screenList: [
+        {
+          name: "方案1",
+          id: 1,
+        },
+      ],
       form: {
         size1: 3,
         size2: 3,
@@ -214,9 +216,6 @@ export default {
     },
     selectBtnLeftPX() {
       return this.selectBtnLeft + "px";
-    },
-    screenListData() {
-      return this.screenList;
     },
   },
   methods: {
@@ -378,8 +377,9 @@ export default {
       }
     },
     apply(id) {
-      this.$store.commit("playData/SET_SPLIT_NAME", "custom");
-      this.$store.commit("playData/SET_SPLIT_X_Y", {
+      console.log(this.mergeArr)
+      this.$store.commit("SET_SPLIT_NAME", "custom");
+      this.$store.commit("SET_SPLIT_X_Y", {
         x: this.form.size1,
         y: this.form.size2,
         splitRes: this.mergeArr,
@@ -486,7 +486,7 @@ export default {
       let maxIndex = Math.max(first.index, last.index) + 1;
       let minIndex = Math.min(first.index, last.index) + 1;
       let divXCount = this.selectWidth / this.itemWidthHeight;
-      let divYCount = this.selectHeight / this.itemWidthHeight;
+      let divYCount = Math.floor(this.selectHeight / this.itemWidthHeight);
       let selectIndex = [];
       for (let i = 0; i < divYCount; i++) {
         //行
