@@ -1,3 +1,9 @@
+<!--
+ * @Author: TJP
+ * @Date: 2024-12-16 15:13:08
+ * @LastEditors: TJP
+ * @LastEditTime: 2024-12-16 16:06:03
+-->
 <!-- 分屏方案 -->
 <template>
   <a-row :gutter="12">
@@ -20,7 +26,7 @@
           >
             <span class="icon"></span>
             <span class="name">{{ item.name }}</span>
-            <a @click.stop="apply()" style="margin-left: 50px"> 应用 </a>
+            <a @click.stop="apply(item)" style="margin-left: 50px"> 应用 </a>
           </div>
         </div>
       </div>
@@ -49,86 +55,21 @@
           </a-form-model-item>
         </a-form-model>
       </div>
-      <div
-        ref="mainDiv"
-        class="main-div"
-        @mouseover="mouseenter"
-        @mouseout="mouseleave"
-        @mousedown="mousedown"
-        @mouseup="mouseup"
-        @contextmenu="contextmenu"
-        :style="{
-          width: divWidthNum * itemWidthHeight + divWidthNum + 5 + 'px',
-          cursor: cursorType,
-        }"
-      >
-        <div
-          class="div-item"
-          :style="{
-            width: itemWidthHeight + 'px',
-            height: itemWidthHeight + 'px',
-          }"
-          v-for="(item, index) in divWidthNum * divHeightNum"
-          :key="index"
-          :data-index="index"
-        ></div>
-        <div
-          class="selectdiv"
-          :style="{
-            display: selectVisible,
-            width: selectWidthPX,
-            height: selectHeightPX,
-            top: selectTopPX,
-            left: selectLeftPX,
-          }"
-        ></div>
-        <div
-          class="itembtn"
-          :style="{
-            display: selectBtnVisible,
-            top: selectBtnTopPX,
-            left: selectBtnLeftPX,
-          }"
-        >
-          <ul>
-            <li @click.stop="handleHB">合并</li>
-            <li @click.stop="handleCancelHB">取消合并</li>
-          </ul>
-        </div>
-      </div>
+      <SplitScreenComponent
+        ref="SplitScreenComponent"
+        :merge="mergeArr"
+        :x="form.size1"
+        :y="form.size2"
+        @result="result"
+      />
     </a-col>
   </a-row>
 </template>
 <script>
-let colors = [
-  "#70d619",
-  "#b0ead0",
-  "#ed8c70",
-  "#9b6685",
-  "#9e81dc",
-  "#0aa400",
-  "#1ad005",
-  "#1bd301",
-  "#6585d6",
-  "#9a826d",
-  "#e5b50d",
-  "#377aa6",
-  "#d6019b",
-  "#855409",
-  "#c14cbd",
-  "#9ba27b",
-  "#e66293",
-  "#a90544",
-  "#1e305c",
-  "#d477c7",
-  "#288c2a",
-  "#81e53a",
-  "#cec941",
-  "#31bc69",
-  "#73e07c",
-];
+import SplitScreenComponent from "./component/SplitScreenComponent";
 export default {
   name: "SplitScreen",
+  components: { SplitScreenComponent },
   data() {
     let that = this;
     let sizeCheck = async () => {
@@ -157,13 +98,13 @@ export default {
     };
     return {
       isActive: 1,
-      divWidthNum: 3,
-      divHeightNum: 3,
-      itemWidthHeight: 120,
       screenList: [
         {
           name: "方案1",
           id: 1,
+          sizeX: 4,
+          sizeY: 4,
+          combineWindows: ["1#2#3"],
         },
       ],
       form: {
@@ -184,65 +125,14 @@ export default {
           },
         ],
       },
-      selectBtnVisible: "none",
-      selectVisible: "none",
-      cursorType: "",
-      selectWidth: "",
-      selectHeight: "",
-      selectTop: "",
-      selectLeft: "",
-      selectBtnTop: "",
-      selectBtnLeft: "",
-      selectDiv: [],
+      mergeArrRes: {},
       mergeArr: [],
-      selecrIndexArr: [],
     };
-  },
-  computed: {
-    selectTopPX() {
-      return this.selectTop + "px";
-    },
-    selectLeftPX() {
-      return this.selectLeft + "px";
-    },
-    selectWidthPX() {
-      return this.selectWidth + "px";
-    },
-    selectHeightPX() {
-      return this.selectHeight + "px";
-    },
-    selectBtnTopPX() {
-      return this.selectBtnTop + "px";
-    },
-    selectBtnLeftPX() {
-      return this.selectBtnLeft + "px";
-    },
   },
   methods: {
     getData() {
       this.screenList = [];
       this.clickItem(this.screenList[0]);
-    },
-    resetData() {
-      this.setOrCancelHB("#ccc");
-      this.selectBtnVisible = "none";
-      this.selectVisible = "none";
-      this.cursorType = "";
-      this.selectWidth = "";
-      this.selectHeight = "";
-      this.selectTop = "";
-      this.selectLeft = "";
-      this.selectBtnTop = "";
-      this.selectBtnLeft = "";
-      this.selectDiv = [];
-      this.mergeArr = [];
-      this.selecrIndexArr = [];
-    },
-    resetStyle() {
-      let divItemAll = document.querySelectorAll(".div-item");
-      divItemAll.forEach((item2) => {
-        item2.style.borderColor = "#ccc";
-      });
     },
     addScreen() {
       let newS = {
@@ -281,247 +171,62 @@ export default {
       const params = {
         sizeX: this.form.size1,
         sizeY: this.form.size2,
-        combineWindows: this.mergeArr.map((item) => item.join("#")),
+        combineWindows: this.mergeArrRes.map((item) => item.join("#")),
       };
     },
     clickItem(item) {
-      this.resetData();
+      this.$refs.SplitScreenComponent.resetData();
 
       this.isActive = item?.id;
       this.form = {
         size1: item?.sizeX || 3,
         size2: item?.sizeY || 3,
       };
-      this.setSplitNum();
       // 回显框选的结果
       this.mergeArr = [];
       if (item?.combineWindows) {
-        JSON.parse(item.combineWindows).forEach((item2) => {
+        item.combineWindows.forEach((item2) => {
           this.mergeArr.push(item2.split("#").map((item3) => Number(item3)));
         });
       }
-
-      this.$nextTick(() => {
-        let box = this.$refs.mainDiv.getBoundingClientRect();
-        this.resetStyle();
-        let divItemAll = document.querySelectorAll(".div-item");
-
-        this.mergeArr.forEach((item2, index) => {
-          item2.forEach((item3) => {
-            divItemAll[item3 - 1].style.borderColor = colors[index];
-          });
-        });
-      });
       console.log(this.mergeArr);
-    },
-    setSplitNum() {
-      this.divWidthNum = this.form.size2 * 1;
-      this.divHeightNum = this.form.size1 * 1;
     },
     change() {
       this.$refs.screenform.validateField(["size"], (error, values) => {
         console.log(values, error);
         if (!error) {
-          this.divWidthNum = this.form.size2 * 1;
           this.mergeArr = [];
-          this.$nextTick(() => {
-            this.resetStyle();
-          });
         }
       });
     },
     changeSize1() {
       this.mergeArr = [];
-      this.$nextTick(() => {
-        this.resetStyle();
-      });
     },
-    handleHB() {
-      let mergeAll = [...this.selecrIndexArr];
-      this.mergeArr.forEach((item) => {
-        mergeAll.push(...item);
-      });
-      if ([...new Set(mergeAll)].length != mergeAll.length) {
-        this.$message.error("框选的分屏已被合并，请重新框选！");
-        return;
-      } else {
-        let index = this.mergeArr.findIndex(
-          (item) => JSON.stringify(item) == JSON.stringify(this.selecrIndexArr)
-        );
-        if (index >= 0) {
-          this.mergeArr.splice(index, 1, this.selecrIndexArr);
-        } else {
-          this.mergeArr.push(this.selecrIndexArr);
-        }
-        let color = colors[this.mergeArr.length - 1];
-        this.setOrCancelHB(color);
-        let s = colors.splice(this.mergeArr.length - 1, 1);
-        colors.push(s);
+    apply(item) {
+      this.mergeArr = [];
+      if (item?.combineWindows) {
+        item.combineWindows.forEach((item2) => {
+          this.mergeArr.push(item2.split("#").map((item3) => Number(item3)));
+        });
       }
-    },
-    setOrCancelHB(color) {
-      this.$refs.mainDiv.querySelectorAll(".div-item").forEach((item) => {
-        let i = item.dataset.index;
-        if (this.selecrIndexArr.indexOf(Number(i) + 1) >= 0) {
-          item.style.borderColor = color;
-        }
-      });
-    },
-    handleCancelHB() {
-      let index = this.mergeArr.findIndex(
-        (item) => JSON.stringify(item) == JSON.stringify(this.selecrIndexArr)
-      );
-      if (index >= 0) {
-        this.mergeArr.splice(index, 1);
-        this.setOrCancelHB("#ccc");
-      }
-    },
-    apply(id) {
-      console.log(this.mergeArr)
+      console.log(this.mergeArr);
       this.$store.commit("SET_SPLIT_NAME", "custom");
       this.$store.commit("SET_SPLIT_X_Y", {
-        x: this.form.size1,
-        y: this.form.size2,
-        splitRes: this.mergeArr,
+        x: item ? item.sizeX : this.mergeArrRes.x,
+        y: item ? item.sizeY : this.mergeArrRes.y,
+        splitRes: item ? this.mergeArr : this.mergeArrRes.splitRes,
       });
     },
-    mouseenter() {
-      this.cursorType = "cell";
-    },
-    mouseleave() {
-      this.cursorType = "";
-    },
-    mousedown(e) {
-      e.preventDefault();
-      if (e.target.tagName == "LI") return;
-      this.selectVisible = "none";
-      this.selectDiv = [];
-      document
-        .querySelector(".main-div")
-        .addEventListener("mousemove", this.mousemove);
-      console.log(e.target);
-      // 计算鼠标按下的位置的元素并设置框选的元素的位置
-      let box = this.$refs.mainDiv.getBoundingClientRect();
-      this.selectBtnVisible = "none";
-      let find = this.getWhichItem(e);
-      this.selectTop = (find.findItemRect?.top || e.clientY) - box.top;
-      this.selectLeft = (find.findItemRect?.left || e.clientX) - box.left;
-      console.log(this.selectTop, this.selectLeft, "weiz");
-      this.selectDiv.push(find);
-      // 框选元素的显示、初始化
-      this.selectWidth = 0;
-      this.selectHeight = 0;
-      if (this.selectWidth > 1 && this.selectHeight > 1) {
-        this.selectVisible = "block";
-      } else {
-        this.selectVisible = "none";
-      }
-    },
-    mousemove(e) {
-      e.preventDefault();
-      // console.log(e, 'move');
-      this.cursorType = "cell";
-
-      let f = this.getWhichItem(e);
-      if (!this.selectDiv.find((item) => item.index == f.index)) {
-        this.selectDiv.push(f);
-      }
-      // console.log(f.dom);
-      // 计算框选的元素宽和高
-      this.selectWidth = Math.abs(
-        Math.max(f.findItemRect?.left, this.selectDiv[0].findItemRect.left) -
-          Math.min(f.findItemRect?.left, this.selectDiv[0].findItemRect.left) +
-          this.itemWidthHeight
+    result(res) {
+      console.log(res);
+      this.mergeArrRes = { ...res };
+      this.$set(this.screenList[0], "sizeX", res.x);
+      this.$set(this.screenList[0], "sizeY", res.y);
+      this.$set(
+        this.screenList[0],
+        "combineWindows",
+        res.splitRes.map((item) => item.join("#"))
       );
-      this.selectHeight = Math.abs(
-        Math.max(f.findItemRect?.top, this.selectDiv[0].findItemRect.top) -
-          Math.min(f.findItemRect?.top, this.selectDiv[0].findItemRect.top) +
-          this.itemWidthHeight
-      );
-      // 计算框选元素的方向
-      let box = this.$refs.mainDiv.getBoundingClientRect();
-      if (f.findItemRect?.top < this.selectDiv[0].findItemRect.top) {
-        this.selectTop = f.findItemRect?.top - box.top;
-      } else {
-        this.selectTop = this.selectDiv[0].findItemRect.top - box.top;
-      }
-      if (f.findItemRect?.left < this.selectDiv[0].findItemRect.left) {
-        this.selectLeft = f.findItemRect?.left - box.left;
-      } else {
-        this.selectLeft = this.selectDiv[0].findItemRect.left - box.left;
-      }
-      // console.log(f.findItemRect, this.selectDiv[0].findItemRect, this.selectHeight);
-
-      // console.log(this.selectWidth, this.selectHeight, '大小');
-      // 框选的显示
-      if (this.selectWidth > 1 && this.selectHeight > 1) {
-        this.selectVisible = "block";
-      } else {
-        this.selectVisible = "none";
-      }
-    },
-    mouseup(e) {
-      e.preventDefault();
-      if (e.target.tagName == "LI") return;
-      console.log(e, "抬起");
-      document
-        .querySelector(".main-div")
-        .removeEventListener("mousemove", this.mousemove);
-      // 计算按钮位置
-      let box = this.$refs.mainDiv.getBoundingClientRect();
-      this.selectBtnTop = e.clientY - box.top;
-      this.selectBtnLeft = e.clientX - box.left;
-      if (
-        this.selectWidth > this.itemWidthHeight ||
-        this.selectHeight > this.itemWidthHeight
-      ) {
-        this.selectBtnVisible = "block";
-      }
-
-      let f = this.getWhichItem(e);
-      this.selectDiv.push(f);
-      // 计算框选的元素
-      let first = this.selectDiv[0];
-      let last = this.selectDiv[this.selectDiv.length - 1];
-      let maxIndex = Math.max(first.index, last.index) + 1;
-      let minIndex = Math.min(first.index, last.index) + 1;
-      let divXCount = this.selectWidth / this.itemWidthHeight;
-      let divYCount = Math.floor(this.selectHeight / this.itemWidthHeight);
-      let selectIndex = [];
-      for (let i = 0; i < divYCount; i++) {
-        //行
-        for (let j = 0; j < divXCount; j++) {
-          // 列
-          selectIndex.push(minIndex + i * this.form.size2 + j);
-        }
-      }
-      console.log(selectIndex.sort((a, b) => a - b));
-      this.selecrIndexArr = selectIndex.sort((a, b) => a - b);
-    },
-    contextmenu(e) {
-      e.preventDefault();
-    },
-    getWhichItem(e) {
-      // 计算鼠标位置在哪个元素内
-      let divItemAll = document.querySelectorAll(".div-item");
-      let first;
-      let dom;
-      let index = 0;
-      divItemAll.forEach((item, indx) => {
-        let itemRect = item.getBoundingClientRect();
-        if (
-          e.clientX > itemRect.x &&
-          e.clientX < itemRect.x + this.itemWidthHeight &&
-          e.clientY > itemRect.y &&
-          e.clientY < itemRect.y + this.itemWidthHeight
-        ) {
-          console.log(item);
-          first = itemRect;
-          dom = item;
-          index = indx;
-        }
-      });
-      return { findItemRect: first, dom, index };
     },
   },
 };

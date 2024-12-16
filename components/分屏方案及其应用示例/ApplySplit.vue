@@ -68,11 +68,6 @@ export default {
       this.$store.state.splitRes.forEach((item) => {
         all.push(...item);
       });
-      console.log(
-        this.$store.state.splitX * this.$store.state.splitY -
-          all.length +
-          this.$store.state.splitRes.length
-      );
       return (
         this.$store.state.splitX * this.$store.state.splitY -
         all.length +
@@ -144,7 +139,9 @@ export default {
               if (index == min) {
                 // 计算框选的第一个格在几行几列
                 let row = parseInt(index / this.$store.state.splitX) + 1;
-                let col = parseInt(min1 % this.$store.state.splitY);
+                let col =
+                  parseInt(min1 % this.$store.state.splitY) ||
+                  this.$store.state.splitY;
                 console.log(row, col);
                 // 设置grid布局样式
                 item.style.gridColumn = col + " / " + (col + nhnl[index2][1]);
@@ -254,7 +251,7 @@ export default {
 }
 .play-box {
   /*background-color: #000000;*/
-  background: #fff;
+  background: #000;
   background-size: 100% 100%;
   border: 1px solid #416da8;
   display: flex;
