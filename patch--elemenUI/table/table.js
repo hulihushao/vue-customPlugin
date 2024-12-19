@@ -19,7 +19,8 @@ export default {
         return {
           draggingIndex: null, // 记录当前拖拽行的索引
           tableData2: [],
-          draggingLevel: 0
+          draggingLevel: 0,
+          rowBgColors: []
         }
       },
       watch: {
@@ -42,6 +43,8 @@ export default {
               const allrow = this.$el.querySelectorAll('tbody tr')
               // console.log(allrow)
               allrow.forEach((row, index) => {
+                row.style.transition = 'all 0.3s'
+                this.rowBgColors.push(window.getComputedStyle(row).backgroundColor)
                 row.draggable = true // 设置行元素为可拖拽
                 // 开始拖拽时的事件处理
                 row.ondragstart = (event) => this.handleDragStart(event, index)
@@ -49,6 +52,11 @@ export default {
                 row.ondragover = (event) => this.handleDragOver(event)
                 // 拖拽放下时的事件处理
                 row.ondrop = (event) => this.handleDrop(event, index)
+                row.ondragend = () => {
+                  allrow.forEach((row, index) => {
+                    row.style.backgroundColor = this.rowBgColors[index]
+                  })
+                }
               })
             })
           })
@@ -82,6 +90,10 @@ export default {
             target.className.split(' ')[1] === this.draggingLevel
           ) {
             event.preventDefault() // 阻止默认事件，允许放置
+            this.$el.querySelectorAll('tbody tr').forEach((item, index) => {
+              item.style.backgroundColor = this.rowBgColors[index]
+            })
+            target.style.backgroundColor = '#409eff1a'
           }
           event.dataTransfer.dropEffect = 'move' // 设置拖拽效果为移动
           this.drag.dragover && this.drag.dragover(this.tableData2[this.draggingIndex], event)
