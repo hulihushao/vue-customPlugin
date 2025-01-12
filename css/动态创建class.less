@@ -1,0 +1,16 @@
+.j-drawer {
+  .ant-drawer-content-wrapper(@width) {
+    .ant-drawer-content-wrapper {
+      width: @width !important;
+    }
+  }
+
+  .create-custom-width(@width) when(@width<=1920) {
+    &.custom-drawer-width-@{width} {
+      .ant-drawer-content-wrapper(if(@width<=100,@width + 0%,@width + 0px));
+    }
+    .create-custom-width(if(@width<100,@width + 10,@width + 100));
+  }
+  // 动态创建class：.custom-drawer-width-@width，避免手动设置，100以内为%，50%开始以10%递增；100以上为px，200px开始以100px递增
+  .create-custom-width(50);
+}
