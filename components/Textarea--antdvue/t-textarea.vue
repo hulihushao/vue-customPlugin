@@ -4,7 +4,9 @@
       ref="textarea"
       :class="{ 'new-padding-left': $attrs.maxLength }"
       v-bind="$attrs"
+      v-on="$listeners"
       v-model="textareaValue"
+      @change="change"
     />
     <span
       v-if="$attrs.maxLength"
@@ -19,7 +21,11 @@
         line-height: 12px;
         transition: unset;
       "
-      :style="{ left: `calc(${textareaWidth}px - ${(textareaValue || '1').length.toString().length * 7.5}px - 38px)` }"
+      :style="{
+        left: `calc(${textareaWidth}px - ${
+          (textareaValue || '1').length.toString().length * 7.5
+        }px - 38px)`,
+      }"
     >
       {{ textareaValue ? textareaValue.length : 0 }}/{{ $attrs.maxLength }}
     </span>
@@ -27,33 +33,41 @@
 </template>
 <script>
 export default {
-  name: 't-textarea',
+  name: "t-textarea",
   data() {
     return {
       textareaValue: undefined,
-      textareaWidth: 0
-    }
+      textareaWidth: 0,
+    };
+  },
+  model: {
+    props: { value },
+    event: "input",
   },
   props: {
     value: {
       type: [String, Number],
-      default: ''
-    }
+      default: "",
+    },
   },
   watch: {
     textareaValue(val) {
-      this.$emit('input', val)
+      this.$emit("input", val);
     },
     value(val) {
-      this.textareaValue = val
-    }
+      this.textareaValue = val;
+    },
   },
   created() {},
   mounted() {
-    this.textareaWidth = this.$refs.textarea.$el.firstChild.offsetWidth
+    this.textareaWidth = this.$refs.textarea.$el.firstChild.offsetWidth;
   },
-  methods: {}
-}
+  methods: {
+    change() {
+      this.$emit("input", this.textareaValue);
+    },
+  },
+};
 </script>
 <style lang="less" scoped>
 .new-padding-left {
