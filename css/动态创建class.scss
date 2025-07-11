@@ -1,0 +1,40 @@
+.j-drawer {
+  // .custom-drawer-width-100
+
+  @mixin ant-drawer-content-wrapper($width) {
+    .ant-drawer-content-wrapper {
+      width: $width !important;
+    }
+  }
+  @mixin  create-custom-width1($width) {
+    @for $i from $width through 100 {
+      &.custom-drawer-width-#{$width} {
+        @if $width < 100 {
+          @include ant-drawer-content-wrapper($width + 0%);
+          $width: $width + 10
+        } @else if $width == 100 {
+          @include ant-drawer-content-wrapper($width + 0%);
+          $width: $width + 100
+        } @else {
+          @include ant-drawer-content-wrapper($width + 0px);
+          $width: $width + 100
+        }
+      }
+    }
+  }
+  @mixin  create-custom-width2($width, $end) {
+    @while $width < $end {
+      @if $width < 100 {
+        @include ant-drawer-content-wrapper($width + 0%);
+        $width: $width + 10
+      } @else if $width == 100 {
+        @include ant-drawer-content-wrapper($width + 0%);
+        $width: $width + 100
+      } @else {
+        @include ant-drawer-content-wrapper($width + 0px);
+        $width: $width + 100
+      }
+    }
+  }
+  @include create-custom-width2(40, 1920);
+}
