@@ -1,23 +1,23 @@
 <template>
-  <div v-if="direction === 'v'">
+  <div v-if="direction === 'v'" class="scroll-btn-content-v">
     <div class="pre" v-if="showBtn" style="display: flex; justify-content: center; margin-bottom: 8px">
       <jura-button icon="up" @mousedown="mousedown('scrollTop', '-')" @mouseup="mouseup" size="small" />
     </div>
-    <span ref="scrollContentRef">
+    <span ref="scrollContentRef" class="scroll-content">
       <slot></slot>
     </span>
     <div class="next" v-if="showBtn" style="display: flex; justify-content: center; margin-top: 8px">
       <jura-button icon="down" @mousedown="mousedown('scrollTop', '+')" @mouseup="mouseup" size="small" />
     </div>
   </div>
-  <div v-else-if="direction === 'h'" style="display: flex">
-    <div class="pre" v-if="showBtn" style="display: flex; align-items: center; margin-bottom: 8px">
+  <div v-else-if="direction === 'h'" class="scroll-btn-content-h" style="display: flex">
+    <div class="pre" v-if="showBtn" style="display: flex; align-items: center; margin-right: 8px">
       <jura-button icon="left" @mousedown="mousedown('scrollLeft', '-')" @mouseup="mouseup" size="small" />
     </div>
-    <span ref="scrollContentRef">
+    <span ref="scrollContentRef" :style="containerStyle" class="scroll-content">
       <slot></slot>
     </span>
-    <div class="next" v-if="showBtn" style="display: flex; align-items: center; margin-top: 8px">
+    <div class="next" v-if="showBtn" style="display: flex; align-items: center; margin-left: 8px">
       <jura-button icon="right" @mousedown="mousedown('scrollLeft', '+')" @mouseup="mouseup" size="small" />
     </div>
   </div>
@@ -43,6 +43,10 @@ export default {
     scrollLength: {
       type: Number,
       default: 10 // px
+    },
+    containerStyle: {
+      type: Object,
+      default: () => ({})
     }
   },
   methods: {
@@ -71,4 +75,17 @@ export default {
   }
 }
 </script>
-<style lang=""></style>
+<style lang="less" scoped>
+.scroll-btn-content-h {
+  width: calc(100% - 64px);
+  height: 100%;
+  .scroll-content {
+    height: 100%;
+    width: 100%;
+  }
+}
+.scroll-btn-content-v {
+  .scroll-content {
+  }
+}
+</style>
