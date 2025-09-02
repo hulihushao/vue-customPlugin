@@ -77,11 +77,11 @@ export default {
 </script>
 <style lang="less" scoped>
 .scroll-btn-content-h {
-  width: calc(100% - 64px);
+  width: 100%;
   height: 100%;
   .scroll-content {
     height: 100%;
-    width: 100%;
+    width: calc(100% - 64px);
   }
 }
 .scroll-btn-content-v {
