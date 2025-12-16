@@ -1,3 +1,9 @@
+/*
+ * @Author: TJP
+ * @Date: 2025-12-12 16:36:43
+ * @LastEditors: TJP
+ * @LastEditTime: 2025-12-15 10:28:00
+ */
 import { Table } from 'element-ui'
 /**
  * 表格组件补丁
@@ -20,7 +26,12 @@ export default {
           draggingIndex: null, // 记录当前拖拽行的索引
           tableData2: [],
           draggingLevel: 0,
-          hoverDom: null
+          hoverDom: null,
+          hoverDomLeft: null,
+          hoverDomRight: null,
+          rows: [],
+          leftRows: [],
+          rightRows: []
         }
       },
       watch: {
@@ -41,14 +52,39 @@ export default {
         getRows() {
           this.$nextTick(() => {
             setTimeout(() => {
-              const allrow = this.$el.querySelectorAll('tbody tr')
+              const allrow = this.$el.querySelectorAll('.el-table__body-wrapper tr.el-table__row')
+              this.rows = allrow
               // console.log(allrow)
-              allrow.forEach((row, index) => {
+              allrow.forEach((row, index) => { // NOSONAR
                 row.draggable = true // 设置行元素为可拖拽
                 // 开始拖拽时的事件处理
                 row.ondragstart = (event) => this.handleDragStart(event, index)
                 // 拖拽经过时的事件处理
-                row.ondragover = (event) => this.handleDragOver(event)
+                row.ondragover = (event) => this.handleDragOver(event, index)
+                // 拖拽放下时的事件处理
+                row.ondrop = (event) => this.handleDrop(event, index)
+              })
+              this.leftRows = this.$el.querySelectorAll(
+                '.el-table__fixed .el-table__fixed-body-wrapper tr.el-table__row'
+              )
+              this.leftRows.forEach((row, index) => { // NOSONAR
+                row.draggable = true // 设置行元素为可拖拽
+                // 开始拖拽时的事件处理
+                row.ondragstart = (event) => this.handleDragStart(event, index, 'fixed')
+                // 拖拽经过时的事件处理
+                row.ondragover = (event) => this.handleDragOver(event, index)
+                // 拖拽放下时的事件处理
+                row.ondrop = (event) => this.handleDrop(event, index)
+              })
+              this.rightRows = this.$el.querySelectorAll(
+                '.el-table__fixed-right .el-table__fixed-body-wrapper tr.el-table__row'
+              )
+              this.rightRows.forEach((row, index) => { // NOSONAR
+                row.draggable = true // 设置行元素为可拖拽
+                // 开始拖拽时的事件处理
+                row.ondragstart = (event) => this.handleDragStart(event, index, 'fixed')
+                // 拖拽经过时的事件处理
+                row.ondragover = (event) => this.handleDragOver(event, index)
                 // 拖拽放下时的事件处理
                 row.ondrop = (event) => this.handleDrop(event, index)
               })
@@ -56,7 +92,7 @@ export default {
           })
         },
         // 处理拖拽开始事件
-        handleDragStart(event, index) {
+        handleDragStart(event, index, type) {
           this.draggingIndex = index // 记录当前拖拽行的索引
           this.draggingLevel = event.target.className.split(' ')[1] || 'el-table__row--level-0'
           if (
@@ -67,11 +103,16 @@ export default {
           }
           event.dataTransfer.effectAllowed = 'move' // 设置拖拽效果为移动
           event.dataTransfer.setData('text/plain', index) // 将索引存储到拖拽数据中
+          if (type === 'fixed') {
+            event.dataTransfer.setData('text/plain', this.rows[index])
+          }
           // console.log(this.draggingLevel)
-          this.drag.dragstart && this.drag.dragstart(this.tableData2[this.draggingIndex], event)
+          if (this.drag.dragstart) {
+            this.drag.dragstart(this.tableData2[this.draggingIndex], event)
+          }
         },
         // 处理拖拽经过事件
-        handleDragOver(event) {
+        handleDragOver(event, index) {
           // console.log(event)
           let target = event.target
           while (target && target.nodeName !== 'TR') {
@@ -88,20 +129,44 @@ export default {
               this.hoverDom.childNodes.forEach((item) => {
                 item.style.borderBottom = '' // 设置拖拽经过行的边框
               })
+              this.hoverDomLeft.childNodes.forEach((item) => {
+                item.style.borderBottom = '' // 设置拖拽经过行的边框
+              })
+              this.hoverDomRight.childNodes.forEach((item) => {
+                item.style.borderBottom = '' // 设置拖拽经过行的边框
+              })
             }
-            this.hoverDom = target
-            target.childNodes.forEach((item) => {
+            this.hoverDom = this.rows[index]
+            this.hoverDomLeft = this.leftRows[index]
+            this.hoverDomRight = this.rightRows[index]
+
+            this.hoverDom.childNodes.forEach((item) => {
+              item.style.borderBottom = `2px solid ${this.drag.hoverBorderColor || '#409EFF'}` // 设置拖拽经过行的边框
+            })
+            this.leftRows[index].childNodes.forEach((item) => {
+              item.style.borderBottom = `2px solid ${this.drag.hoverBorderColor || '#409EFF'}` // 设置拖拽经过行的边框
+            })
+            this.rightRows[index].childNodes.forEach((item) => {
               item.style.borderBottom = `2px solid ${this.drag.hoverBorderColor || '#409EFF'}` // 设置拖拽经过行的边框
             })
           } else {
+            console.log(this.hoverDom)
             if (this.hoverDom) {
               this.hoverDom.childNodes.forEach((item) => {
+                item.style.borderBottom = '' // 设置拖拽经过行的边框
+              })
+              this.hoverDomLeft.childNodes.forEach((item) => {
+                item.style.borderBottom = '' // 设置拖拽经过行的边框
+              })
+              this.hoverDomRight.childNodes.forEach((item) => {
                 item.style.borderBottom = '' // 设置拖拽经过行的边框
               })
             }
           }
           event.dataTransfer.dropEffect = 'move' // 设置拖拽效果为移动
-          this.drag.dragover && this.drag.dragover(this.tableData2[this.draggingIndex], event)
+          if (this.drag.dragover) {
+            this.drag.dragover(this.tableData2[this.draggingIndex], event)
+          }
         },
         // 处理拖拽放下事件
         handleDrop(event, targetIndex) {
@@ -109,7 +174,15 @@ export default {
             this.hoverDom.childNodes.forEach((item) => {
               item.style.borderBottom = '' // 设置拖拽经过行的边框
             })
+            this.hoverDomLeft.childNodes.forEach((item) => {
+              item.style.borderBottom = '' // 设置拖拽经过行的边框
+            })
+            this.hoverDomRight.childNodes.forEach((item) => {
+              item.style.borderBottom = '' // 设置拖拽经过行的边框
+            })
             this.hoverDom = null
+            this.hoverDomLeft = null
+            this.hoverDomRight = null
           }
           const sourceIndex = this.draggingIndex // 获取开始拖拽时记录的索引
           const sourceData = this.tableData2[sourceIndex]
@@ -127,13 +200,15 @@ export default {
             (this.draggingLevel.includes('level-0') && !target.className.split(' ')[1]) ||
             target.className.split(' ')[1] === this.draggingLevel
           ) {
+            console.log(sourceIndex, targetIndex)
           } else {
             return
           }
           this.draggingIndex = null // 重置拖拽索引
           target = null
-          this.drag?.dragend &&
+          if (this.drag.dragend) {
             this.drag.dragend({ data: sourceData, index: sourceIndex }, { data: targetData, index: targetIndex }, event)
+          }
         },
         expendAll(data, list) {
           data.forEach((item) => {
